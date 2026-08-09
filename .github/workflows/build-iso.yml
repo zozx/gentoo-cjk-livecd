@@ -56,6 +56,22 @@ jobs:
               echo \"[+] Found Stage1 Spec: \$STAGE1\"
               echo \"[+] Found Stage2 Spec: \$STAGE2\"
               
+          
+              STAGE3_INFO=\$(curl -s https://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3-amd64-openrc.txt | grep -v '^#')
+              STAGE3_PATH=\$(echo \"\$STAGE3_INFO\" | awk '{print \$1}')
+              STAGE3_TARBALL=\$(basename \"\$STAGE3_PATH\")
+              TIMESTAMP=\$(echo \"\$STAGE3_TARBALL\" | sed -E 's/stage3-amd64-openrc-(.*)\.tar\.xz/\1/')
+
+              echo \"[+] Detected latest Stage3 timestamp: \$TIMESTAMP\"
+
+              mkdir -p /var/tmp/catalyst/builds/23.0-default
+              wget -q -O \"/var/tmp/catalyst/builds/23.0-default/stage3-amd64-openrc-\${TIMESTAMP}.tar.xz\" \
+      \"https://distfiles.gentoo.org/releases/amd64/autobuilds/\${STAGE3_PATH}\"
+
+              sed -i \"s|@TIMESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE1\"
+              sed -i \"s|@TIMESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE2\"
+              sed -i \"s|@DATESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE1\"
+              sed -i \"s|@DATESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE2\"
 
               sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
               sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
