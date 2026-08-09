@@ -46,14 +46,6 @@ mkdir -p "$SEED_DIR"
 wget -q -O "$SEED_DIR/stage3-amd64-openrc-${TIMESTAMP}.tar.xz" \
   "https://distfiles.gentoo.org/releases/amd64/autobuilds/${STAGE3_PATH}"
 
-
-echo "[+] Detected Stage3 Timestamp: $TIMESTAMP"
-
-SEED_DIR="/var/tmp/catalyst/builds/23.0-default"
-mkdir -p "$SEED_DIR"
-wget -q -O "$SEED_DIR/stage3-amd64-openrc-${TIMESTAMP}.tar.xz" \
-  "https://distfiles.gentoo.org/releases/amd64/autobuilds/${STAGE3_PATH}"
-
 echo "===> 6. 替換 Spec 檔案參數..."
 # 替換時間戳記
 sed -i "s|@TIMESTAMP@|${TIMESTAMP}|g" "$STAGE1" "$STAGE2"
