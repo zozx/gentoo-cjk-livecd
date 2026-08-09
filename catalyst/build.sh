@@ -18,9 +18,9 @@ cp -a /workspace/catalyst/fsystem/etc/. /etc/
 emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
 
 echo "===> 3. 拉取 gentoo-zh 與 官方 releng 倉庫..."
-mkdir -p /workspace/catalyst/fsystem/var/db/repos/gentoo-zh
-if [ ! -d "/workspace/catalyst/fsystem/var/db/repos/gentoo-zh/.git" ]; then
-  git clone --depth 1 https://github.com/gentoo-zh/overlay.git /workspace/catalyst/fsystem/var/db/repos/gentoo-zh
+mkdir -p /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
+if [ ! -d "/workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh/.git" ]; then
+  git clone --depth 1 https://github.com/gentoo-zh/overlay.git /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
 fi
 git clone --depth 1 https://github.com/gentoo/releng.git /tmp/releng
 
