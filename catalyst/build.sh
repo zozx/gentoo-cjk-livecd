@@ -71,6 +71,8 @@ sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' "$STA
 sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' "$STAGE1" "$STAGE2"
 sed -i 's|boot/kernel/gentoo/sources:.*|boot/kernel/gentoo/sources: sys-kernel/gentoo-cjk-kernel-bin|g' "$STAGE2"
 
+sed -i 's|app-arch/p7zip|app-arch/7zip|g' "$STAGE1" "$STAGE2"
+
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE1"
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE2"
 echo "livecd/overlay: /workspace/catalyst/fsystem" >> "$STAGE2"
