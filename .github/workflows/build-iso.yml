@@ -38,7 +38,7 @@ jobs:
               mkdir -p /etc/portage/repos.conf /etc/portage/package.accept_keywords
               cp -r /workspace/catalyst/fsystem/etc/portage/* /etc/portage/
               
-              emerge --verbose dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub
+              emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub
 
               mkdir -p /var/db/repos/gentoo-zh
               git clone --depth 1 https://github.com/microcai/gentoo-zh.git /var/db/repos/gentoo-zh
