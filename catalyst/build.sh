@@ -77,6 +77,7 @@ sed -i 's|app-admin/hddtemp|sys-apps/lm-sensors|g' "$STAGE1" "$STAGE2"
 sed -i 's|net-misc/ntp|net-misc/chrony|g' "$STAGE1" "$STAGE2"
 
 sed -i '/sys-fs\/reiserfsprogs/d' "$STAGE1" "$STAGE2"
+sed -i '/sys-fs\/dmraid/d' "$STAGE1" "$STAGE2"
 
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE1"
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE2"
