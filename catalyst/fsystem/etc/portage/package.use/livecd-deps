@@ -1,0 +1,6 @@
+sys-fs/lvm2 lvm
+net-wireless/wpa_supplicant dbus
+net-misc/networkmanager wifi dhcpcd
+sys-fs/cryptsetup openssl
+sys-boot/grub mount libzstd
+app-crypt/gnupg -smartcard
