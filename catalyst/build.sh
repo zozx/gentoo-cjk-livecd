@@ -75,21 +75,9 @@ echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE1"
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE2"
 echo "livecd/overlay: /workspace/catalyst/fsystem" >> "$STAGE2"
 
-echo "===> 7. 執行 Catalyst 構建..."
-mkdir -p /var/tmp/catalyst /var/builds
-catalyst -s latest
-
-# ----------------- 診斷區塊 -----------------
-echo "===> [診斷] 檢查 Snapshot 檔案大小："
-ls -lh /var/tmp/catalyst/snapshots/gentoo-latest.sqfs
-
-echo "===> [診斷] 手動測試 Loop 掛載："
-mkdir -p /tmp/test_mount
-mount -vt squashfs -o loop /var/tmp/catalyst/snapshots/gentoo-latest.sqfs /tmp/test_mount || echo "[!] Mount 失敗，離開代碼: $?"
-echo "===> [診斷] 檢查掛載點內容："
-ls -la /tmp/test_mount
-umount /tmp/test_mount || true
-# --------------------------------------------
+echo "===> 7. 打包 Portage Tree Snapshot 並執行 Catalyst 構建..."
+mkdir -p /var/tmp/catalyst/snapshots /var/tmp/catalyst/builds /var/builds
+mksquashfs /var/db/repos/gentoo /var/tmp/catalyst/snapshots/gentoo-latest.sqfs -comp gzip -b 1M
 
 catalyst -f "$STAGE1"
 catalyst -f "$STAGE2"
