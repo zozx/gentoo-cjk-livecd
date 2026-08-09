@@ -72,6 +72,11 @@ sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' "$STAGE1
 sed -i 's|boot/kernel/gentoo/sources:.*|boot/kernel/gentoo/sources: sys-kernel/gentoo-cjk-kernel-bin|g' "$STAGE2"
 
 sed -i 's|app-arch/p7zip|app-arch/7zip|g' "$STAGE1" "$STAGE2"
+sed -i 's|net-dns/bind-tools|net-dns/bind|g' "$STAGE1" "$STAGE2"
+sed -i 's|app-admin/hddtemp|sys-apps/lm-sensors|g' "$STAGE1" "$STAGE2"
+sed -i 's|net-misc/ntp|net-misc/chrony|g' "$STAGE1" "$STAGE2"
+
+sed -i '/sys-fs\/reiserfsprogs/d' "$STAGE1" "$STAGE2"
 
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE1"
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE2"
