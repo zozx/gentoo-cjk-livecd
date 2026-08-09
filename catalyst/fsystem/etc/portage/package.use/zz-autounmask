@@ -1,0 +1,6 @@
+# required by dev-util/catalyst-9999::gentoo
+# required by dev-util/catalyst (argument)
+>=sys-apps/util-linux-2.42.2 python
+# required by dev-util/catalyst-9999::gentoo[iso,-qcow2]
+# required by dev-util/catalyst (argument)
+>=sys-boot/grub-2.14-r5 grub_platforms_efi-32
