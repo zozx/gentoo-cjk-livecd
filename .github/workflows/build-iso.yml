@@ -48,7 +48,6 @@ jobs:
               STAGE1=\$(find \"\$SPEC_DIR\" -name \"*installcd*stage1*.spec\" | head -n 1)
               STAGE2=\$(find \"\$SPEC_DIR\" -name \"*installcd*stage2*.spec\" | head -n 1)
 
-    # 若找不到 installcd 則降級搜尋 livecd
               if [ -z \"\$STAGE1\" ] || [ -z \"\$STAGE2\" ]; then
                 STAGE1=\$(find \"\$SPEC_DIR\" -name \"*livecd*stage1*.spec\" | head -n 1)
                 STAGE2=\$(find \"\$SPEC_DIR\" -name \"*livecd*stage2*.spec\" | head -n 1)
