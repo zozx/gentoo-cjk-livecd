@@ -28,10 +28,24 @@ echo "[+] Target Stage1 Spec: $STAGE1"
 echo "[+] Target Stage2 Spec: $STAGE2"
 
 echo "===> 5. 取得最新 Stage3 種子檔與 TIMESTAMP..."
-STAGE3_INFO=$(curl -s https://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3-amd64-openrc.txt | grep -v '^#')
-STAGE3_PATH=$(echo "$STAGE3_INFO" | awk '{print $1}')
-STAGE3_TARBALL=$(basename "$STAGE3_PATH")
+# 僅提取包含 stage3 與 .tar.xz 的真實路徑行，避免抓到 PGP 簽名標頭（-----BEGIN...）
+STAGE3_PATH=$(curl -s https://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3-amd64-openrc.txt | grep -E 'stage3-amd64-openrc-.*\.tar\.xz' | awk '{print $1}' | head -n 1)
+
+if [ -z "$STAGE3_PATH" ]; then
+  echo "[!] 錯誤：無法從 Gentoo 鏡像取得 Stage3 路徑！"
+  exit 1
+fi
+
+STAGE3_TARBALL=$(basename -- "$STAGE3_PATH")
 TIMESTAMP=$(echo "$STAGE3_TARBALL" | sed -E 's/stage3-amd64-openrc-(.*)\.tar\.xz/\1/')
+
+echo "[+] Detected Stage3 Timestamp: $TIMESTAMP"
+
+SEED_DIR="/var/tmp/catalyst/builds/23.0-default"
+mkdir -p "$SEED_DIR"
+wget -q -O "$SEED_DIR/stage3-amd64-openrc-${TIMESTAMP}.tar.xz" \
+  "https://distfiles.gentoo.org/releases/amd64/autobuilds/${STAGE3_PATH}"
+
 
 echo "[+] Detected Stage3 Timestamp: $TIMESTAMP"
 
