@@ -1,0 +1,90 @@
+name: Build Gentoo CJK Minimal LiveCD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'catalyst/**'
+      - '.github/workflows/build-iso.yml'
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+      - name: Build ISO via Catalyst
+        run: |
+          docker run --privileged --rm \
+            -v ${{ github.workspace }}:/workspace \
+            gentoo/stage3:latest /bin/bash -c "
+              set -e
+
+              emerge-webrsync
+              emerge --verbose dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub
+
+              mkdir -p /var/db/repos/gentoo-zh
+              git clone --depth 1 https://github.com/microcai/gentoo-zh.git /var/db/repos/gentoo-zh
+              git clone --depth 1 https://github.com/gentoo/releng.git /tmp/releng
+
+              mkdir -p /etc/portage/repos.conf /etc/portage/package.accept_keywords
+              cp -r /workspace/catalyst/fsystem/etc/portage/* /etc/portage/
+
+              SPEC_DIR=\"/tmp/releng/releases/specs/amd64\"
+              
+              if [ -f \"\$SPEC_DIR/installcd-stage1.spec\" ]; then
+                STAGE1=\"\$SPEC_DIR/installcd-stage1.spec\"
+                STAGE2=\"\$SPEC_DIR/installcd-stage2.spec\"
+              else
+                STAGE1=\"\$SPEC_DIR/livecd-stage1.spec\"
+                STAGE2=\"\$SPEC_DIR/livecd-stage2.spec\"
+              fi
+
+              sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
+              sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
+              sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
+              sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
+              sed -i 's|boot/kernel/gentoo/sources:.*|boot/kernel/gentoo/sources: sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
+
+              echo \"livecd/overlay: /workspace/catalyst/fsystem\" >> \"\$STAGE2\"
+
+              mkdir -p /var/tmp/catalyst /var/builds
+              catalyst -s latest
+
+              catalyst -f \"\$STAGE1\"
+              catalyst -f \"\$STAGE2\"
+
+              cp /var/tmp/catalyst/builds/default/*stage2*/*.iso /workspace/gentoo-cjk-minimal.iso
+            "
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gentoo-cjk-minimal-iso
+          path: ${{ github.workspace }}/gentoo-cjk-minimal.iso
+          retention-days: 7
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ github.workspace }}/gentoo-cjk-minimal.iso
+          tag_name: build-${{ github.run_number }}
+          name: Gentoo CJK Minimal LiveCD #${{ github.run_number }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
