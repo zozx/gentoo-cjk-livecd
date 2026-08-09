@@ -2,6 +2,9 @@
 set -euo pipefail
 
 echo "===> 0. 建立 Loop 設備節點..."
+if [ ! -c /dev/loop-control ]; then
+  mknod /dev/loop-control c 10 237
+fi
 for i in $(seq 0 15); do
   if [ ! -b "/dev/loop$i" ]; then
     mknod -m 0660 "/dev/loop$i" b 7 "$i"
@@ -75,6 +78,18 @@ echo "livecd/overlay: /workspace/catalyst/fsystem" >> "$STAGE2"
 echo "===> 7. 執行 Catalyst 構建..."
 mkdir -p /var/tmp/catalyst /var/builds
 catalyst -s latest
+
+# ----------------- 診斷區塊 -----------------
+echo "===> [診斷] 檢查 Snapshot 檔案大小："
+ls -lh /var/tmp/catalyst/snapshots/gentoo-latest.sqfs
+
+echo "===> [診斷] 手動測試 Loop 掛載："
+mkdir -p /tmp/test_mount
+mount -vt squashfs -o loop /var/tmp/catalyst/snapshots/gentoo-latest.sqfs /tmp/test_mount || echo "[!] Mount 失敗，離開代碼: $?"
+echo "===> [診斷] 檢查掛載點內容："
+ls -la /tmp/test_mount
+umount /tmp/test_mount || true
+# --------------------------------------------
 
 catalyst -f "$STAGE1"
 catalyst -f "$STAGE2"
