@@ -5,15 +5,13 @@ echo "===> 1. 更新 Portage Tree..."
 emerge-webrsync
 
 echo "===> 2. 安裝 Catalyst 與相關工具..."
-mkdir -p /etc/portage/package.accept_keywords
-echo "dev-util/catalyst ~amd64" >> /etc/portage/package.accept_keywords/catalyst
-ACCEPT_KEYWORDS="~amd64" emerge --verbose dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
+cp -r /workspace/catalyst/fsystem/etc .
+
+emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
 
 echo "===> 3. 拉取 gentoo-zh 與 官方 releng 倉庫..."
-mkdir -p /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
-if [ ! -d "/workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh/.git" ]; then
-  git clone --depth 1 https://github.com/microcai/gentoo-zh.git /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
-fi
+mkdir -p /workspace/catalyst/fsystem/var/db/repos/gentoo-zh
+git clone --depth 1 https://github.com/gentoo-zh/overlay.git /workspace/catalyst/fsystem/var/db/repos/gentoo-zh
 git clone --depth 1 https://github.com/gentoo/releng.git /tmp/releng
 
 echo "===> 4. 定位 Spec 檔案..."
