@@ -26,79 +26,11 @@ jobs:
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-      - name: Build ISO via Catalyst
+      - name: Build ISO via Catalyst Script
         run: |
           docker run --privileged --rm \
             -v ${{ github.workspace }}:/workspace \
-            gentoo/stage3:latest /bin/bash -c "
-              set -e
-
-              
-              emerge-webrsync
-
-              
-              mkdir -p /etc/portage/package.accept_keywords
-              echo 'dev-util/catalyst ~amd64' >> /etc/portage/package.accept_keywords/catalyst
-              ACCEPT_KEYWORDS='~amd64' emerge --verbose dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget
-
-              
-              mkdir -p /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
-              git clone --depth 1 https://github.com/microcai/gentoo-zh.git /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
-              git clone --depth 1 https://github.com/gentoo/releng.git /tmp/releng
-
-              
-              SPEC_DIR='/tmp/releng/releases/specs/amd64'
-              STAGE1=\$(find \"\$SPEC_DIR\" -name '*installcd*stage1*.spec' | head -n 1)
-              STAGE2=\$(find \"\$SPEC_DIR\" -name '*installcd*stage2*.spec' | head -n 1)
-
-              if [ -z \"\$STAGE1\" ] || [ -z \"\$STAGE2\" ]; then
-                STAGE1=\$(find \"\$SPEC_DIR\" -name '*livecd*stage1*.spec' | head -n 1)
-                STAGE2=\$(find \"\$SPEC_DIR\" -name '*livecd*stage2*.spec' | head -n 1)
-              fi
-
-              echo \"[+] Found Stage1 Spec: \$STAGE1\"
-              echo \"[+] Found Stage2 Spec: \$STAGE2\"
-
-              
-              STAGE3_INFO=\$(curl -s https://distfiles.gentoo.org/releases/amd64/autobuilds/latest-stage3-amd64-openrc.txt | grep -v '^#')
-              STAGE3_PATH=\$(echo \"\$STAGE3_INFO\" | awk '{print \$1}')
-              STAGE3_TARBALL=\$(basename \"\$STAGE3_PATH\")
-              TIMESTAMP=\$(echo \"\$STAGE3_TARBALL\" | sed -E 's/stage3-amd64-openrc-(.*)\.tar\.xz/\1/')
-
-              echo \"[+] Detected latest Stage3 timestamp: \$TIMESTAMP\"
-
-              mkdir -p /var/tmp/catalyst/builds/23.0-default
-              wget -q -O \"/var/tmp/catalyst/builds/23.0-default/stage3-amd64-openrc-\${TIMESTAMP}.tar.xz\" \
-                \"https://distfiles.gentoo.org/releases/amd64/autobuilds/\${STAGE3_PATH}\"
-
-              
-              sed -i \"s|@TIMESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE1\"
-              sed -i \"s|@TIMESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE2\"
-              sed -i \"s|@DATESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE1\"
-              sed -i \"s|@DATESTAMP@|\${TIMESTAMP}|g\" \"\$STAGE2\"
-
-              sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
-              sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE1\"
-              sed -i 's|sys-kernel/gentoo-kernel-bin|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
-              sed -i 's|sys-kernel/gentoo-sources|sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
-              sed -i 's|boot/kernel/gentoo/sources:.*|boot/kernel/gentoo/sources: sys-kernel/gentoo-cjk-kernel-bin|g' \"\$STAGE2\"
-
-              
-              echo 'portage_confdir: /workspace/catalyst/fsystem/etc/portage' >> \"\$STAGE1\"
-              echo 'portage_confdir: /workspace/catalyst/fsystem/etc/portage' >> \"\$STAGE2\"
-              echo 'livecd/overlay: /workspace/catalyst/fsystem' >> \"\$STAGE2\"
-
-              
-              mkdir -p /var/tmp/catalyst /var/builds
-              catalyst -s latest
-
-              catalyst -f \"\$STAGE1\"
-              catalyst -f \"\$STAGE2\"
-
-              
-              cp /var/tmp/catalyst/builds/default/*stage2*/*.iso /workspace/gentoo-cjk-minimal.iso
-            "
-
+            gentoo/stage3:latest /bin/bash /workspace/catalyst/build.sh
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
@@ -106,15 +38,3 @@ jobs:
           name: gentoo-cjk-minimal-iso
           path: ${{ github.workspace }}/gentoo-cjk-minimal.iso
           retention-days: 7
-
-      - name: Create GitHub Release
-        if: github.event_name == 'workflow_dispatch'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ github.workspace }}/gentoo-cjk-minimal.iso
-          tag_name: build-${{ github.run_number }}
-          name: Gentoo CJK Minimal LiveCD #${{ github.run_number }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
