@@ -82,6 +82,14 @@ echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE1"
 echo "portage_confdir: /workspace/catalyst/fsystem/etc/portage" >> "$STAGE2"
 echo "livecd/overlay: /workspace/catalyst/fsystem" >> "$STAGE2"
 
+for spec in "$STAGE1" "$STAGE2"; do
+  if grep -q "^emerge_opts:" "$spec"; then
+    sed -i 's|^emerge_opts:.*|emerge_opts: --quiet --usepkg --getbinpkg=y --binpkg-respect-use=y|g' "$spec"
+  else
+    echo "emerge_opts: --quiet --usepkg --getbinpkg=y --binpkg-respect-use=y" >> "$spec"
+  fi
+done
+
 echo "===> 7. 打包 Portage Tree Snapshot 並執行 Catalyst 構建..."
 mkdir -p /var/tmp/catalyst/snapshots /var/tmp/catalyst/builds /var/builds
 mksquashfs /var/db/repos/gentoo /var/tmp/catalyst/snapshots/gentoo-latest.sqfs -comp gzip -b 1M
