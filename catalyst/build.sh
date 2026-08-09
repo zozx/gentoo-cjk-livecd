@@ -22,7 +22,7 @@ echo "===> 3. 套用專案 Portage 配置並安裝 Catalyst..."
 # 確保 git clone 完成後，再將包含完整 Overlay 的 etc 配置同步至容器 /etc/
 cp -a /workspace/catalyst/fsystem/etc/. /etc/
 
-emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
+emerge --verbose --getbinpkg --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
 
 echo "===> 4. 定位 Spec 檔案..."
 SPEC_DIR="/tmp/releng/releases/specs/amd64"
