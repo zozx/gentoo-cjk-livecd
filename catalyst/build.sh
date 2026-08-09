@@ -11,18 +11,18 @@ done
 echo "===> 1. 更新 Portage Tree..."
 emerge-webrsync
 
-echo "===> 2. 套用專案 Portage 配置並安裝 Catalyst..."
-# 將專案中的 etc 配置同步至容器系統中，包含外層所需的 package.accept_keywords
-cp -a /workspace/catalyst/fsystem/etc/. /etc/
-
-emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
-
-echo "===> 3. 拉取 gentoo-zh 與 官方 releng 倉庫..."
+echo "===> 2. 拉取 gentoo-zh 與 官方 releng 倉庫..."
 mkdir -p /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
 if [ ! -d "/workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh/.git" ]; then
   git clone --depth 1 https://github.com/gentoo-zh/overlay.git /workspace/catalyst/fsystem/etc/portage/repos/gentoo-zh
 fi
 git clone --depth 1 https://github.com/gentoo/releng.git /tmp/releng
+
+echo "===> 3. 套用專案 Portage 配置並安裝 Catalyst..."
+# 確保 git clone 完成後，再將包含完整 Overlay 的 etc 配置同步至容器 /etc/
+cp -a /workspace/catalyst/fsystem/etc/. /etc/
+
+emerge --verbose --quiet dev-vcs/git dev-util/catalyst sys-fs/squashfs-tools sys-boot/grub net-misc/wget net-misc/curl
 
 echo "===> 4. 定位 Spec 檔案..."
 SPEC_DIR="/tmp/releng/releases/specs/amd64"
