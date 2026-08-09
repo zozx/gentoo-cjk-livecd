@@ -29,6 +29,7 @@ jobs:
       - name: Build ISO via Catalyst Script
         run: |
           docker run --privileged --rm \
+            -v /dev:/dev \
             -v ${{ github.workspace }}:/workspace \
             gentoo/stage3:latest /bin/bash /workspace/catalyst/build.sh
 
