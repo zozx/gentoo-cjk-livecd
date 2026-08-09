@@ -4,3 +4,4 @@ net-misc/networkmanager wifi dhcpcd
 sys-fs/cryptsetup openssl
 sys-boot/grub mount libzstd
 app-crypt/gnupg -smartcard
+net-libs/ngtcp2 gnutls
